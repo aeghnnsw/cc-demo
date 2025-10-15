@@ -6,3 +6,19 @@ trees/
 
 # Logs directory
 logs/
+
+# LaTeX intermediate files
+slides_latex/*.aux
+slides_latex/*.fdb_latexmk
+slides_latex/*.fls
+slides_latex/*.log
+slides_latex/*.nav
+slides_latex/*.out
+slides_latex/*.snm
+slides_latex/*.synctex.gz
+slides_latex/*.toc
+slides_latex/*.pdf
+slides_latex/*.vrb
+
+# IDE files
+.vscode/
