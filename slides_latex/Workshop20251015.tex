@@ -17,7 +17,7 @@
 	\includegraphics[scale=0.2]{logo_OSU.png}
 	\end{textblock}}
 
-\date{October 15, 2025}
+\date{November 10, 2025}
 \begin{document}
 \frame{\titlepage}
 
@@ -31,6 +31,7 @@
 
 \item \textbf{Model Context Protocol (MCP)}
 \item \textbf{Subagents \& Automation}
+\item \textbf{Skills}
 \item \textbf{GitHub Integration \& Best Practices}
 
 \end{itemize}
@@ -128,151 +129,148 @@ MCP is an open-source standard that connects AI applications to external systems
 
 \begin{frame}
 
-\vspace{2cm}
 \centering
 \Huge
 \textbf{PyMOL-MCP Demo}
 
 \end{frame}
 
-\begin{frame}
+% \begin{frame}
 
-\vspace{1cm}
-\centering
-\Large
+% \vspace{1cm}
+% \centering
+% \Large
 
-MCP tools are like API calls or function definitions
+% MCP tools are like API calls or function definitions
 
-\vspace{1cm}
+% \vspace{1cm}
 
-\begin{tikzpicture}
-\node[rectangle, draw, rounded corners, fill=blue!10, text width=10cm, align=center, font=\large] {
-\textbf{function\_name(argument1, argument2, ...)}\\
-\vspace{0.3cm}
-\normalsize
-AI calls the function $\rightarrow$ MCP executes $\rightarrow$ Returns result
-};
-\end{tikzpicture}
+% \begin{tikzpicture}
+% \node[rectangle, draw, rounded corners, fill=blue!10, text width=10cm, align=center, font=\large] {
+% \textbf{function\_name(argument1, argument2, ...)}\\
+% \vspace{0.3cm}
+% \normalsize
+% AI calls the function $\rightarrow$ MCP executes $\rightarrow$ Returns result
+% };
+% \end{tikzpicture}
 
-\vspace{1cm}
+% \vspace{1cm}
 
-\large
-\textbf{Key insight:} Anything with an API can become MCP tools
+% \large
+% \textbf{Key insight:} Anything with an API can become MCP tools
 
-\end{frame}
+% \end{frame}
 
+% \begin{frame}[fragile]{Original: One MCP Tool per PyMOL Command}
 
+% \vspace{0.1cm}
+% \small
+% Each PyMOL function becomes a separate MCP tool with specific arguments:
 
-\begin{frame}[fragile]{Original: One MCP Tool per PyMOL Command}
+% \vspace{0.2cm}
 
-\vspace{0.1cm}
-\small
-Each PyMOL function becomes a separate MCP tool with specific arguments:
+% \begin{verbatim}
+% @mcp.tool()
+% def fetch(structure: str):
+%     """Fetch structure from PDB"""
+%     return cmd.fetch(structure)
 
-\vspace{0.2cm}
+% @mcp.tool()
+% def show(representation: str, selection: str):
+%     """Show molecular representation"""
+%     return cmd.show(representation, selection)
 
-\begin{verbatim}
-@mcp.tool()
-def fetch(structure: str):
-    """Fetch structure from PDB"""
-    return cmd.fetch(structure)
+% @mcp.tool()
+% def color(color: str, selection: str):
+%     """Color selection"""
+%     return cmd.color(color, selection)
 
-@mcp.tool()
-def show(representation: str, selection: str):
-    """Show molecular representation"""
-    return cmd.show(representation, selection)
+% ... (hundreds more tools)
+% \end{verbatim}
 
-@mcp.tool()
-def color(color: str, selection: str):
-    """Color selection"""
-    return cmd.color(color, selection)
+% \vspace{0.1cm}
+% \normalsize
+% \textbf{Problem:} Must create one MCP tool for each PyMOL function
 
-... (hundreds more tools)
-\end{verbatim}
+% \end{frame}
 
-\vspace{0.1cm}
-\normalsize
-\textbf{Problem:} Must create one MCP tool for each PyMOL function
+% \begin{frame}[fragile]{Modified: Two Generic MCP Tools}
 
-\end{frame}
+% \vspace{0.1cm}
+% \small
+% Just 2 MCP tools — AI decides which PyMOL function to call:
 
-\begin{frame}[fragile]{Modified: Two Generic MCP Tools}
+% \vspace{0.2cm}
 
-\vspace{0.1cm}
-\small
-Just 2 MCP tools — AI decides which PyMOL function to call:
+% \begin{verbatim}
+% @mcp.tool()
+% def pymol_command(command: str):
+%     """Execute any PyMOL command"""
+%     # AI sends: "fetch 1ubq" or "show cartoon" or "color red, chain A"
+%     return cmd.do(command)
 
-\vspace{0.2cm}
+% @mcp.tool()
+% def pymol_python_api(python_code: str):
+%     """Execute any PyMOL Python API"""
+%     # AI sends: "cmd.fetch('1ubq')" or "cmd.align('obj1', 'obj2')"
+%     return execute(python_code)
+% \end{verbatim}
 
-\begin{verbatim}
-@mcp.tool()
-def pymol_command(command: str):
-    """Execute any PyMOL command"""
-    # AI sends: "fetch 1ubq" or "show cartoon" or "color red, chain A"
-    return cmd.do(command)
+% \vspace{0.1cm}
+% \normalsize
+% \textbf{Same PyMOL API, different MCP interface}\\
+% \textbf{Advantage:} AI decides which function and arguments to use
 
-@mcp.tool()
-def pymol_python_api(python_code: str):
-    """Execute any PyMOL Python API"""
-    # AI sends: "cmd.fetch('1ubq')" or "cmd.align('obj1', 'obj2')"
-    return execute(python_code)
-\end{verbatim}
+% \end{frame}
 
-\vspace{0.1cm}
-\normalsize
-\textbf{Same PyMOL API, different MCP interface}\\
-\textbf{Advantage:} AI decides which function and arguments to use
+% \begin{frame}
 
-\end{frame}
+% \vspace{0.3cm}
 
-\begin{frame}
+% \begin{columns}[t]
 
-\vspace{0.3cm}
+% \column{0.48\textwidth}
+% \centering
+% \textbf{\large Original (Community)}
+% \vspace{0.3cm}
 
-\begin{columns}[t]
+% \normalsize
+% \begin{itemize}
+% \item Large command dictionary
+% \item Complex parsing logic
+% \item Pre-validate all commands
+% \item Error pattern matching
+% \item One main tool
+% \end{itemize}
 
-\column{0.48\textwidth}
-\centering
-\textbf{\large Original (Community)}
-\vspace{0.3cm}
+% \vspace{0.5cm}
+% \textcolor{red}{\textbf{More code, less flexible}}
 
-\normalsize
-\begin{itemize}
-\item Large command dictionary
-\item Complex parsing logic
-\item Pre-validate all commands
-\item Error pattern matching
-\item One main tool
-\end{itemize}
+% \column{0.48\textwidth}
+% \centering
+% \textbf{\large Modified (Simplified)}
+% \vspace{0.3cm}
 
-\vspace{0.5cm}
-\textcolor{red}{\textbf{More code, less flexible}}
+% \normalsize
+% \begin{itemize}
+% \item No command dictionary
+% \item Direct execution
+% \item Two simple tools
+% \item Let AI formulate commands
+% \item ~290 lines total
+% \end{itemize}
 
-\column{0.48\textwidth}
-\centering
-\textbf{\large Modified (Simplified)}
-\vspace{0.3cm}
+% \vspace{0.5cm}
+% \textcolor{blue}{\textbf{Less code, more powerful}}
 
-\normalsize
-\begin{itemize}
-\item No command dictionary
-\item Direct execution
-\item Two simple tools
-\item Let AI formulate commands
-\item ~290 lines total
-\end{itemize}
+% \end{columns}
 
-\vspace{0.5cm}
-\textcolor{blue}{\textbf{Less code, more powerful}}
+% \vspace{0.8cm}
+% \centering
+% \large
+% \textbf{Key insight:} AI already knows PyMOL — no need to reinvent the wheel
 
-\end{columns}
-
-\vspace{0.8cm}
-\centering
-\large
-\textbf{Key insight:} AI already knows PyMOL — no need to reinvent the wheel
-
-\end{frame}
+% \end{frame}
 
 \begin{frame}{Building Your Own MCP}
 
@@ -409,6 +407,14 @@ Subagents are specialized AI assistants for specific tasks
 
 \end{frame}
 
+\begin{frame}
+
+\centering
+\Huge
+\textbf{Data collection Workflow Demo}
+
+\end{frame}
+
 \begin{frame}[fragile]{Creating Your Own Agents with Meta-Agent}
 
 \centering
@@ -478,6 +484,180 @@ OPTIMIZATION:
 \vspace{0.6cm}
 \Large
 \textbf{Discussion: What specialized subagents would help us research?}
+
+\end{frame}
+
+\begin{frame}{Claude Skills}
+
+\vspace{0.5cm}
+\centering
+\Large
+Skills provide specialized workflows and domain expertise
+
+\vspace{0.8cm}
+
+\normalsize
+\begin{itemize}
+\item Pre-packaged workflows with instructions and best practices
+\item Domain-specific knowledge (scientific writing, document processing, development)
+\item Invoked by name when needed, runs within main conversation
+\item Different from MCP: Skills = workflows, MCP = tools
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\centering
+\Large
+\textbf{Skills extend Claude with specialized knowledge — like having expert colleagues}
+
+\vspace{1cm}
+
+\begin{columns}[t]
+
+\column{0.3\textwidth}
+\centering
+\textbf{\large Document Processing}
+\vspace{0.4cm}
+
+\normalsize
+\begin{itemize}
+\item PDF manipulation
+\item Excel/spreadsheet analysis
+\item Word document editing
+\end{itemize}
+
+\column{0.3\textwidth}
+\centering
+\textbf{\large Content Creation}
+\vspace{0.4cm}
+
+\normalsize
+\begin{itemize}
+\item Scientific figures
+\item Scientific slides
+\item Poster design
+\end{itemize}
+
+\column{0.3\textwidth}
+\centering
+\textbf{\large Research Workflows}
+\vspace{0.4cm}
+
+\normalsize
+\begin{itemize}
+\item Paper reading Q\&A
+\item Problem-solving cycle
+\end{itemize}
+
+\end{columns}
+
+\end{frame}
+
+\begin{frame}
+
+\vspace{0.3cm}
+
+\begin{columns}[t]
+
+\column{0.48\textwidth}
+\centering
+\textbf{\large Skills}
+\vspace{0.3cm}
+
+\normalsize
+\begin{itemize}
+\item Workflow instructions
+\item Domain expertise
+\item Best practices guides
+\item Multi-step procedures
+\item Runs in main conversation
+\end{itemize}
+
+\vspace{0.5cm}
+\textcolor{blue}{\textbf{When: Complex workflows}}
+
+\column{0.48\textwidth}
+\centering
+\textbf{\large MCP Tools}
+\vspace{0.3cm}
+
+\normalsize
+\begin{itemize}
+\item Function calls
+\item External system access
+\item API integrations
+\item Real-time data
+\item Action execution
+\end{itemize}
+
+\vspace{0.5cm}
+\textcolor{blue}{\textbf{When: External connections}}
+
+\end{columns}
+
+\vspace{0.8cm}
+\centering
+\large
+\textbf{Key insight:} Skills guide how to work, MCP provides what to work with
+
+\end{frame}
+
+\begin{frame}{Built-in Skills Examples}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+\setlength{\itemsep}{0.4cm}
+
+\item \textbf{document-skills:pdf} — Extract text/tables, create/merge PDFs
+\item \textbf{document-skills:xlsx} — Spreadsheet analysis with formulas and visualization
+\item \textbf{mcp-builder} — Guide for creating MCP servers
+\item \textbf{skill-creator} — Build custom skills for your workflows
+\item \textbf{canvas-design} — Create visual designs for posters and figures
+
+\end{itemize}
+
+\vspace{0.5cm}
+\centering
+\Large
+More at: \textbf{github.com/anthropics/skills}
+
+\end{frame}
+
+\begin{frame}[fragile]{Anatomy of a Skill: SKILL.md}
+
+\vspace{0.2cm}
+\small
+
+Skills are defined in a single \texttt{SKILL.md} file with two parts:
+
+\vspace{0.3cm}
+
+\textbf{1. Metadata}
+\begin{verbatim}
+name: skill-name
+description: When and how to use this skill
+\end{verbatim}
+
+\textbf{2. Markdown Instructions (Workflow)}
+\begin{itemize}
+\item Purpose and overview
+\item Step-by-step procedures
+\item When to use the skill
+\item References to tools, scripts, or documentation
+\end{itemize}
+
+\normalsize
+\textbf{Pro tip:} Use \texttt{skill-creator} to generate SKILL.md for your skills
+
+\end{frame}
+
+\begin{frame}
+
+\centering
+\Huge
+\textbf{Skills Demo: Paper Reading}
 
 \end{frame}
 

@@ -1,6 +1,9 @@
 # OS generated files
 .DS_Store
 
+# PDB server output
+PDB-server-output/
+
 # Git worktrees
 trees/
 
